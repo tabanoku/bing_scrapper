@@ -1,6 +1,4 @@
 import threading
-from pprint import pprint
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -12,7 +10,8 @@ user_agent = {
 
 def _scrapper(term: str):
     bing_url = f"https://www.bing.com/search?q={term}"
-    
+    result_list = []
+
     response = requests.get(bing_url, headers=user_agent)
     response.raise_for_status()
 
@@ -20,8 +19,11 @@ def _scrapper(term: str):
     result_block = soup.select("li.b_algo > h2 > a")
 
     print(f"{term}:")
-    pprint([i.get_text() for i in result_block] )
-    pprint([i.get_attribute_list("href") for i in result_block])
+    for result in result_block:
+        result_list.append([result.get_text(), result.get_attribute_list("href")])
+
+    print(result_list)
 
 for search_item in array:
-    _scrapper(search_item)
+   t = threading.Thread(target=_scrapper(search_item))
+   t.start()
